@@ -115,19 +115,19 @@ ENV N8N_RUNNERS_MODE=internal
 # Debug/logging for security testing
 ENV N8N_LOG_LEVEL=info
 
-WORKDIR /app
+WORKDIR /home/node
 
-# Copy compiled application from builder
-COPY --from=builder /build/compiled /app
+# Copy compiled application to standard n8n location
+COPY --from=builder /build/compiled /usr/local/lib/node_modules/n8n
 
 # Setup directories
-RUN mkdir -p /app/data
+RUN mkdir -p /home/node/.n8n
 
 # Try sqlite3 rebuild (may fail if prebuilt works)
-RUN cd /app && npm rebuild sqlite3 || true
+RUN cd /usr/local/lib/node_modules/n8n && npm rebuild sqlite3 || true
 
 # Create symlink
-RUN ln -sf /app/bin/n8n /usr/local/bin/n8n
+RUN ln -sf /usr/local/lib/node_modules/n8n/bin/n8n /usr/local/bin/n8n
 
 # Entrypoint script
 COPY <<'ENTRYPOINT' /docker-entrypoint.sh
@@ -140,7 +140,7 @@ if [ -n "$PORT" ]; then
 fi
 
 # Create data directory if needed
-mkdir -p /app/data
+mkdir -p /home/node/.n8n
 
 # Generate encryption key if not exists and not provided
 if [ ! -f /app/data/encryption.key ] && [ -z "$N8N_ENCRYPTION_KEY" ]; then
