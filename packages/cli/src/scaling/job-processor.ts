@@ -82,6 +82,16 @@ export class JobProcessor {
 			jobId: job.id,
 		});
 
+		if (job.data.isMcpExecution) {
+			this.logger.debug('MCP DEBUG: Worker picked up MCP execution', {
+				executionId,
+				workflowId,
+				mcpSessionId: job.data.mcpSessionId,
+				mcpMessageId: job.data.mcpMessageId,
+				targetMainId: job.data.originMainId,
+			});
+		}
+
 		const startedAt = await this.executionRepository.setRunning(executionId);
 
 		let { staticData } = execution.workflowData;
@@ -294,6 +304,14 @@ export class JobProcessor {
 		// For MCP executions, send an mcp-response message to notify main
 		// Main will fetch the execution data from DB and resolve the pending promise
 		if (job.data.isMcpExecution && job.data.mcpSessionId && job.data.originMainId) {
+			this.logger.debug('MCP DEBUG: Worker sending response back to main', {
+				executionId,
+				workflowId,
+				success: props.success,
+				mcpSessionId: job.data.mcpSessionId,
+				targetMainId: job.data.originMainId,
+			});
+
 			const mcpMsg: McpResponseMessage = {
 				kind: 'mcp-response',
 				executionId,
@@ -306,6 +324,12 @@ export class JobProcessor {
 			};
 
 			await job.progress(mcpMsg);
+
+			this.logger.debug('MCP DEBUG: Worker sent response to main successfully', {
+				executionId,
+				workflowId,
+				targetMainId: job.data.originMainId,
+			});
 		}
 
 		/**
