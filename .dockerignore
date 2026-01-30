@@ -13,10 +13,6 @@
 !dist
 !dist/task-runner-javascript
 !dist/task-runner-javascript/**
-!packages
-!packages/@n8n
-!packages/@n8n/task-runner-python
-!packages/@n8n/task-runner-python/**
 
 # === Docker build files (entrypoints, configs) ===
 !docker
@@ -25,3 +21,37 @@
 !docker/images/n8n/docker-entrypoint.sh
 !docker/images/runners
 !docker/images/runners/n8n-task-runners.json
+
+# === SPAIK Source Build (Dockerfile at root) ===
+# Package configuration files
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!turbo.json
+!.npmrc
+
+# All packages (source code)
+!packages
+!packages/**
+
+# Patches required for pnpm install
+!patches
+!patches/**
+
+# Scripts required for build process
+!scripts
+!scripts/**
+
+# GitHub scripts (for trim-fe-packageJson.js)
+!.github
+!.github/scripts
+!.github/scripts/**
+
+# Exclude test files and unnecessary items from packages
+packages/**/test
+packages/**/tests
+packages/**/__tests__
+packages/**/*.test.ts
+packages/**/*.spec.ts
+packages/**/coverage
+packages/**/.turbo

@@ -252,6 +252,10 @@ export class License implements LicenseProvider {
 	}
 
 	isLicensed(feature: BooleanLicenseFeature) {
+		// SPAIK Enterprise Evaluation: All features enabled for security testing
+		if (process.env.N8N_ENTERPRISE_EVALUATION === 'true') {
+			return true;
+		}
 		return this.manager?.hasFeatureEnabled(feature) ?? false;
 	}
 
@@ -380,6 +384,24 @@ export class License implements LicenseProvider {
 	}
 
 	getValue<T extends keyof FeatureReturnType>(feature: T): FeatureReturnType[T] {
+		// SPAIK Enterprise Evaluation: Return unlimited quotas for security testing
+		if (process.env.N8N_ENTERPRISE_EVALUATION === 'true') {
+			const unlimitedQuotas: Record<string, number> = {
+				'quota:users': UNLIMITED_LICENSE_QUOTA,
+				'quota:activeWorkflows': UNLIMITED_LICENSE_QUOTA,
+				'quota:maxVariables': UNLIMITED_LICENSE_QUOTA,
+				'quota:workflowHistoryPrune': UNLIMITED_LICENSE_QUOTA,
+				'quota:maxTeamProjects': UNLIMITED_LICENSE_QUOTA,
+				'quota:aiCredits': 10000,
+				'quota:insights:maxHistoryDays': 365,
+				'quota:insights:retention:maxAgeDays': 365,
+				'quota:insights:retention:pruneIntervalDays': 1,
+				'quota:evaluations:maxWorkflows': UNLIMITED_LICENSE_QUOTA,
+			};
+			if (feature in unlimitedQuotas) {
+				return unlimitedQuotas[feature] as FeatureReturnType[T];
+			}
+		}
 		return this.manager?.getFeatureValue(feature) as FeatureReturnType[T];
 	}
 
@@ -450,6 +472,10 @@ export class License implements LicenseProvider {
 	}
 
 	getPlanName(): string {
+		// SPAIK Enterprise Evaluation: Show evaluation plan name
+		if (process.env.N8N_ENTERPRISE_EVALUATION === 'true') {
+			return 'Enterprise (SPAIK Evaluation)';
+		}
 		return this.getValue('planName') ?? 'Community';
 	}
 
