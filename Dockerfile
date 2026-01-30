@@ -120,13 +120,16 @@ WORKDIR /app
 # Copy compiled application from builder
 COPY --from=builder /build/compiled /app
 
-# Setup application
-# Try to rebuild sqlite3, but don't fail if it doesn't work (prebuilt might be fine)
-RUN (cd /app && npm rebuild sqlite3 2>&1 || echo "sqlite3 rebuild skipped - using prebuilt") && \
-    ln -s /app/bin/n8n /usr/local/bin/n8n && \
-    mkdir -p /app/data && \
-    addgroup -g 1000 n8n && \
+# Setup user and permissions first
+RUN addgroup -g 1000 n8n && \
     adduser -u 1000 -G n8n -s /bin/sh -D n8n && \
+    mkdir -p /app/data
+
+# Try sqlite3 rebuild (may fail if prebuilt works)
+RUN cd /app && npm rebuild sqlite3 || true
+
+# Create symlink and set ownership
+RUN ln -s /app/bin/n8n /usr/local/bin/n8n && \
     chown -R n8n:n8n /app
 
 # Entrypoint script
