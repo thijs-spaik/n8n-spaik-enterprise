@@ -56,7 +56,9 @@ RUN if [ -f .github/scripts/trim-fe-packageJson.js ]; then \
     fi
 
 # Create pruned production deployment
-RUN NODE_ENV=production pnpm --filter=n8n --prod --legacy deploy --no-optional ./compiled
+# Set config to allow unused patches (dev dependencies have patches not needed in prod)
+RUN pnpm config set allow-non-applied-patches true && \
+    NODE_ENV=production pnpm --filter=n8n --prod --legacy deploy --no-optional ./compiled
 
 # =============================================================================
 # Stage 2: Production - Runtime image with Python support
