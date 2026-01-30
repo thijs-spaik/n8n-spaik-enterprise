@@ -72,6 +72,7 @@ RUN node -e "const p=require('./package.json'); \
 FROM node:${NODE_VERSION}-alpine AS production
 
 # Install runtime dependencies including Python 3 for task runners
+# Also include build tools temporarily for sqlite3 native rebuild
 RUN apk add --no-cache \
     git \
     openssh \
@@ -82,7 +83,9 @@ RUN apk add --no-cache \
     ca-certificates \
     libc6-compat \
     python3 \
-    py3-pip && \
+    py3-pip \
+    make \
+    g++ && \
     # Install full-icu for internationalization
     npm install -g full-icu@1.5.0 && \
     # Cleanup
