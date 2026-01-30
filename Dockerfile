@@ -120,9 +120,9 @@ WORKDIR /app
 # Copy compiled application from builder
 COPY --from=builder /build/compiled /app
 
-# Setup user and permissions first
-RUN addgroup -g 1000 n8n && \
-    adduser -u 1000 -G n8n -s /bin/sh -D n8n && \
+# Setup user and permissions first (handle case where they might exist)
+RUN (addgroup -g 1000 n8n || true) && \
+    (adduser -u 1000 -G n8n -s /bin/sh -D n8n || true) && \
     mkdir -p /app/data
 
 # Try sqlite3 rebuild (may fail if prebuilt works)
