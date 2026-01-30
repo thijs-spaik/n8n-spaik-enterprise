@@ -129,12 +129,9 @@ RUN (addgroup -g 1000 n8n || true) && \
 RUN cd /app && npm rebuild sqlite3 || true
 
 # Create symlink and set ownership
-# Debug: show what's in /app
-RUN ls -la /app && ls -la /app/bin 2>/dev/null || echo "No bin dir" && \
-    (test -f /app/bin/n8n && ln -sf /app/bin/n8n /usr/local/bin/n8n) || \
-    echo "n8n binary not at expected location, checking alternatives..." && \
-    find /app -name "n8n" -type f 2>/dev/null | head -5 && \
-    chown -R n8n:n8n /app
+RUN ln -sf /app/bin/n8n /usr/local/bin/n8n
+
+RUN chown -R n8n:n8n /app
 
 # Entrypoint script
 COPY <<'ENTRYPOINT' /docker-entrypoint.sh
