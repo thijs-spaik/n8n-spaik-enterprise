@@ -56,8 +56,14 @@ RUN if [ -f .github/scripts/trim-fe-packageJson.js ]; then \
     fi
 
 # Create pruned production deployment
-# Set config to allow unused patches (dev dependencies have patches not needed in prod)
-RUN pnpm config set allow-non-applied-patches true && \
+# Remove unused patches from package.json before deploy (these patches are for dev deps only)
+RUN node -e "const p=require('./package.json'); \
+    if(p.pnpm?.patchedDependencies) { \
+      delete p.pnpm.patchedDependencies['element-plus@2.4.3']; \
+      delete p.pnpm.patchedDependencies['z-vue-scan']; \
+      delete p.pnpm.patchedDependencies['v-code-diff']; \
+    } \
+    require('fs').writeFileSync('./package.json', JSON.stringify(p, null, 2));" && \
     NODE_ENV=production pnpm --filter=n8n --prod --legacy deploy --no-optional ./compiled
 
 # =============================================================================
