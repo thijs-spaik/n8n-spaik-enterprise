@@ -120,18 +120,14 @@ WORKDIR /app
 # Copy compiled application from builder
 COPY --from=builder /build/compiled /app
 
-# Setup user and permissions first (handle case where they might exist)
-RUN (addgroup -g 1000 n8n || true) && \
-    (adduser -u 1000 -G n8n -s /bin/sh -D n8n || true) && \
-    mkdir -p /app/data
+# Setup directories
+RUN mkdir -p /app/data
 
 # Try sqlite3 rebuild (may fail if prebuilt works)
 RUN cd /app && npm rebuild sqlite3 || true
 
-# Create symlink and set ownership
+# Create symlink
 RUN ln -sf /app/bin/n8n /usr/local/bin/n8n
-
-RUN chown -R n8n:n8n /app
 
 # Entrypoint script
 COPY <<'ENTRYPOINT' /docker-entrypoint.sh
@@ -181,8 +177,7 @@ RUN chmod +x /docker-entrypoint.sh
 # Expose default n8n port
 EXPOSE 5678
 
-# Switch to non-root user
-USER n8n
+# Running as root for evaluation (not recommended for production)
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
