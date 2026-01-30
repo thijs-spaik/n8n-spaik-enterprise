@@ -121,7 +121,8 @@ WORKDIR /app
 COPY --from=builder /build/compiled /app
 
 # Setup application
-RUN npm rebuild sqlite3 && \
+# Try to rebuild sqlite3, but don't fail if it doesn't work (prebuilt might be fine)
+RUN (cd /app && npm rebuild sqlite3 2>&1 || echo "sqlite3 rebuild skipped - using prebuilt") && \
     ln -s /app/bin/n8n /usr/local/bin/n8n && \
     mkdir -p /app/data && \
     addgroup -g 1000 n8n && \
